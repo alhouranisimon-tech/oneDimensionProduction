@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Font Awesome CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -67,6 +70,8 @@
             height: 100%;
             background-color: black;
         }
+
+      
   </style>
   
 
@@ -179,13 +184,20 @@
   
   
   
-  
-  
+  <div id="scroll-indicator" class="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-3 opacity-90">
+    <!-- Scroll Text -->
+    <span class="text-lg font-semibold text-white tracking-wide transition-all duration-300 transform group-hover:scale-105">Scroll Down</span>
+    
+    <!-- Custom Downward Arrow (Triangle Style) -->
+    <div class="w-0 h-0 border-l-4 border-r-4 border-t-8 border-transparent border-t-white animate-bounce"></div>
+</div>
 
-  
+
 
   <!-- JavaScript for the Carousel -->
   <script>
+
+
     // JavaScript for automatic slide transition
     let currentIndex = 0;
     const images = document.querySelectorAll('.carousel-item');
