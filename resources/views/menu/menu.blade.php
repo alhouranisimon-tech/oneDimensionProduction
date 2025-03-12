@@ -60,37 +60,18 @@
       text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
     }
 
-    /* Chef Signature Styles */
+    /* Chef Signature Styles - Integrated into Layout */
     .chef-signature {
-      position: absolute;
-      top: 1rem;
-      right: 2rem;
-      z-index: 20;
-      font-size: 1.5rem;
-      font-weight: bold;
+      font-family: 'Brush Script MT', cursive;
+      font-size: 1.2rem;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 0.3rem 1rem;
+      border-radius: 20px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
       letter-spacing: 1px;
-    }
-
-    .chef-signature-holographic {
-      background: linear-gradient(
-        to right, 
-        #ff00ff, 
-        #00ffff, 
-        #ffff00, 
-        #ff00ff
-      );
-      background-size: 400% 100%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-fill-color: transparent;
-      animation: holographic-shift 3s ease infinite;
-    }
-
-    @keyframes holographic-shift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      display: inline-block;
+      margin-right: 1rem;
     }
 
     /* Menu Navigation Improvements */
@@ -117,6 +98,16 @@
       transform-origin: left;
     }
 
+    /* Menu Header Container */
+    .menu-header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
     /* Subcategory and Item Card Enhancements */
     .subcategory-card {
       backdrop-filter: blur(10px);
@@ -134,12 +125,16 @@
     @media (max-width: 640px) {
       .chef-signature {
         font-size: 1rem;
-        right: 1rem;
+        padding: 0.2rem 0.8rem;
       }
 
       .menu-link {
         padding: 0.75rem 0;
         font-size: 1rem;
+      }
+      
+      .menu-header-container {
+        padding: 0.5rem 1rem;
       }
     }
 
@@ -159,13 +154,18 @@
 
 <body>
   <section class="w-full h-auto min-h-screen fixed-bg bg-[url('/activities/jdidjdid.jpg')]">
-    <!-- Chef Signature with Holographic Effect -->
-    <div class="chef-signature chef-signature-holographic text-shadow-lg">
-      By Chef Georges Nader
+    <!-- Menu Header with Chef Signature for food section only -->
+    <div class="menu-header-container">
+      <div class="text-white text-xl">Menu</div>
+      @if(Request::is('menu/Food'))
+      <div class="chef-signature">
+        By Chef Georges Nader
+      </div>
+      @endif
     </div>
 
     <!-- Header Navigation -->
-    <header class="w-full flex flex-wrap py-16 text-white relative z-10 px-8" role="navigation">
+    <header class="w-full flex flex-wrap py-8 text-white relative z-10 px-8" role="navigation">
       @foreach ($mainCategories as $cat)
         <a href="{{ route('menu.show', $cat) }}" 
            class="flex-1 text-center flex justify-center items-center border-l-4 border-white 
