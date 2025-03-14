@@ -121,6 +121,60 @@
       box-shadow: 0 20px 30px rgba(0,0,0,0.2);
     }
 
+    /* Subcategory Navigation */
+    .subcategory-nav {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 1rem;
+      padding: 1rem 0;
+      margin-bottom: 2rem;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .subcategory-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .subcategory-nav-item {
+      flex: 0 0 auto;
+      padding: 0.5rem 1.5rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid transparent;
+      white-space: nowrap;
+    }
+
+    .subcategory-nav-item:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .subcategory-nav-item.active {
+      background-color: rgba(22, 163, 74, 0.7);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Category Header */
+    .category-header {
+      position: relative;
+      margin-bottom: 2rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .category-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 3px;
+      background-color: #16a34a;
+    }
+
     /* Responsive Typography */
     @media (max-width: 640px) {
       .chef-signature {
@@ -136,6 +190,11 @@
       .menu-header-container {
         padding: 0.5rem 1rem;
       }
+
+      .subcategory-nav-item {
+        padding: 0.4rem 1rem;
+        font-size: 0.9rem;
+      }
     }
 
     /* Read More/Less Button Style */
@@ -149,6 +208,16 @@
       color: #22c55e;
       text-decoration: underline;
     }
+
+    /* Fade Animation */
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 
@@ -156,8 +225,7 @@
   <section class="w-full h-auto min-h-screen fixed-bg bg-[url('/activities/jdidjdid.jpg')]">
     <!-- Menu Header with Chef Signature for food section only -->
     <div class="menu-header-container">
-      <div class="text-white text-xl">Menu</div>
-      @if(Request::is('menu/Food'))
+      @if(isset($currentCategory) && $currentCategory == 'Food')
       <div class="chef-signature">
         By Chef Georges Nader
       </div>
@@ -166,51 +234,87 @@
 
     <!-- Header Navigation -->
     <header class="w-full flex flex-wrap py-8 text-white relative z-10 px-8" role="navigation">
-      @foreach ($mainCategories as $cat)
-        <a href="{{ route('menu.show', $cat) }}" 
-           class="flex-1 text-center flex justify-center items-center border-l-4 border-white 
-                  menu-link py-8 
-                  {{ Request::is('menu/'.$cat) ? 'bg-white text-green-600 border-green-600' : 'text-white' }}
-                  text-base sm:text-2xl lg:text-3xl"
-           aria-label="{{ $cat }} menu">{{ strtoupper($cat) }}</a>
-      @endforeach
+      @if(isset($mainCategories) && count($mainCategories) > 0)
+        @foreach ($mainCategories as $cat)
+          <a href="{{ route('menu.show', $cat) }}" 
+             class="flex-1 text-center flex justify-center items-center border-l-4 border-white 
+                    menu-link py-8 
+                    {{ request()->is('menu/'.$cat) ? 'bg-white text-green-600 border-green-600' : 'text-white' }}
+                    text-base sm:text-2xl lg:text-3xl"
+             aria-label="{{ $cat }} menu">{{ strtoupper($cat) }}</a>
+        @endforeach
+      @endif
     </header>
     
-    <!-- Subcategories Section -->
-    <section class="max-w-7xl mx-auto relative z-10 px-4 md:px-2">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- Category Title -->
+    @if(isset($currentCategory))
+    <div class="text-center mb-8 px-4">
+      <h1 class="text-4xl md:text-5xl font-bold text-white category-header text-shadow-lg">
+        {{ $currentCategory }}
+      </h1>
+    </div>
+    @endif
+    
+    <!-- Subcategory Navigation -->
+    @if(isset($subcategories) && count($subcategories) > 0)
+    <div class="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+      <div class="subcategory-nav" id="subcategory-nav">
+        <button class="subcategory-nav-item active text-white" data-subcategory="all">
+          All
+        </button>
         @foreach ($subcategories as $subcategory)
-          <div class="subcategory-card text-white rounded-lg shadow-lg p-6">
+          <button class="subcategory-nav-item text-white" data-subcategory="{{ Str::slug($subcategory->name) }}">
+            {{ $subcategory->name }}
+          </button>
+        @endforeach
+      </div>
+    </div>
+    
+    <!-- Subcategories Section -->
+    <section class="max-w-7xl mx-auto relative z-10 px-4 md:px-8 pb-20">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="subcategory-container">
+        @foreach ($subcategories as $subcategory)
+          <div class="subcategory-card text-white rounded-lg shadow-lg p-6" data-subcategory="{{ Str::slug($subcategory->name) }}">
             <h2 class="text-2xl font-bold text-white mb-6 pb-2 border-b border-white/30 text-shadow-lg">
               {{ $subcategory->name }}
             </h2>
 
             <ul class="space-y-6">
-              @foreach ($subcategory->items as $item)
-                <li class="flex justify-between items-start">
-                  <div class="flex-grow pr-4">
-                    <h3 class="text-xl font-semibold mb-2 text-shadow-lg">{{ $item->name }}</h3>
-                    <p class="text-gray-200 italic truncate-description" data-full-text="{{ $item->description }}">
-                      <span class="short-description">{{ Str::limit($item->description, 50) }}</span>
-                      @if (strlen($item->description) > 50)
-                        <a href="#" class="expand-description">Read More</a>
-                      @endif
-                    </p>
-                  </div>
-                  <span class="text-yellow-400 font-bold text-xl text-shadow-lg">
-                    ${{ number_format($item->price, 2) }}
-                  </span>
-                </li>
-              @endforeach
+              @if(isset($subcategory->items) && count($subcategory->items) > 0)
+                @foreach ($subcategory->items as $item)
+                  <li class="flex justify-between items-start">
+                    <div class="flex-grow pr-4">
+                      <h3 class="text-xl font-semibold mb-2 text-shadow-lg">{{ $item->name }}</h3>
+                      <p class="text-gray-200 italic truncate-description" data-full-text="{{ $item->description }}">
+                        <span class="short-description">{{ Str::limit($item->description, 50) }}</span>
+                        @if (strlen($item->description) > 50)
+                          <a href="#" class="expand-description">Read More</a>
+                        @endif
+                      </p>
+                    </div>
+                    <span class="text-yellow-400 font-bold text-xl text-shadow-lg">
+                      ${{ number_format($item->price, 2) }}
+                    </span>
+                  </li>
+                @endforeach
+              @else
+                <li>No items available in this category.</li>
+              @endif
             </ul>
           </div>
         @endforeach
       </div>
     </section>
+    @else
+    <div class="text-center text-white py-16">
+      <p class="text-xl">No subcategories available.</p>
+    </div>
+    @endif
   </section>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+      // Read More/Less functionality
       document.querySelectorAll('.expand-description').forEach(button => {
         button.addEventListener('click', function (event) {
           event.preventDefault();
@@ -227,6 +331,56 @@
           }
         });
       });
+
+      // Subcategory navigation functionality
+      const subcategoryButtons = document.querySelectorAll('.subcategory-nav-item');
+      const subcategoryCards = document.querySelectorAll('.subcategory-card');
+
+      subcategoryButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // Remove active class from all buttons
+          subcategoryButtons.forEach(btn => btn.classList.remove('active'));
+          
+          // Add active class to clicked button
+          this.classList.add('active');
+          
+          const selectedSubcategory = this.getAttribute('data-subcategory');
+          
+          // Hide all cards first
+          subcategoryCards.forEach(card => {
+            card.style.display = 'none';
+            card.classList.remove('fade-in');
+          });
+          
+          // Show only the selected subcategory or all
+          if (selectedSubcategory === 'all') {
+            subcategoryCards.forEach(card => {
+              card.style.display = 'block';
+              setTimeout(() => {
+                card.classList.add('fade-in');
+              }, 10);
+            });
+          } else {
+            const selectedCards = document.querySelectorAll(`.subcategory-card[data-subcategory="${selectedSubcategory}"]`);
+            selectedCards.forEach(card => {
+              card.style.display = 'block';
+              setTimeout(() => {
+                card.classList.add('fade-in');
+              }, 10);
+            });
+          }
+        });
+      });
+
+      // Scroll subcategory into view if URL has hash
+      if (window.location.hash) {
+        const subcategoryId = window.location.hash.substring(1);
+        const subcategoryButton = document.querySelector(`.subcategory-nav-item[data-subcategory="${subcategoryId}"]`);
+        if (subcategoryButton) {
+          subcategoryButton.click();
+          subcategoryButton.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
     });
   </script>
 </body>
