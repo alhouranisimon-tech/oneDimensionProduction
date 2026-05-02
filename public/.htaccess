@@ -1,3 +1,8 @@
+<FilesMatch "\.php$">
+    <IfModule mod_proxy_fcgi.c>
+        SetHandler "proxy:fcgi://127.0.0.1:9080"
+    </IfModule>
+</FilesMatch>
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
